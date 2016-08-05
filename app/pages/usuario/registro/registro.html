@@ -1,0 +1,50 @@
+<ion-header>
+  <ion-navbar primary>
+    <ion-title>
+      <ion-icon name="person-add"></ion-icon> {{title}}</ion-title>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <form [ngFormModel]="usuarioForm" (ngSubmit)="saveUsuario()">
+    <ion-list>
+      <ion-item>
+        <ion-label primary stacked>Razón Social</ion-label>
+        <ion-input type="text" placeholder="Nombre de la empresa" [(ngModel)]="usuario.razonSocial"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>Persona de contacto</ion-label>
+        <ion-input type="text" ngControl="nombre" [(ngModel)]="usuario.nombre" placeholder="Apellido y nombre " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>E-mail</ion-label>
+        <ion-input type="email" ngControl="email" [(ngModel)]="usuario.email" placeholder="e-mail de contacto " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>Teléfono</ion-label>
+        <ion-input type="number" ngControl="telefono" [(ngModel)]="usuario.telefono" placeholder="Teléfono de contacto " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>Dirección</ion-label>
+        <ion-input type="text" ngControl="direccion" [(ngModel)]="usuario.direccion" placeholder="Direccion de entrega " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>Localidad</ion-label>
+        <ion-input type="text" ngControl="localidad" [(ngModel)]="usuario.localidad" placeholder="Localidad o ciudad " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>Provincia</ion-label>
+        <ion-input type="text" ngControl="provincia" [(ngModel)]="usuario.provincia" placeholder="Provincia " required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label primary stacked>País</ion-label>
+        <ion-input type="text" ngControl="pais" [(ngModel)]="usuario.pais" placeholder="País " required></ion-input>
+      </ion-item>
+    </ion-list>
+    <button fab fab-bottom fab-center type="submit" [disabled]="!usuarioForm.valid">
+    <ion-icon name="person-add"></ion-icon>
+  </button>
+  </form>
+  <button fab fab-bottom fab-rigth [disabled]="!isInDB" (click)="borrarDB()">
+    <ion-icon name="trash"></ion-icon>
+  </button>
+</ion-content>

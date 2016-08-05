@@ -1,0 +1,7 @@
+Requerimientos:
+- SQLite Plugin 2 for Cordova
+	ionic plugin add cordova-plugin-sqlite-2
+
+- PouchDB library
+	npm install pouchdb --save
+	typings install dt~require --global --save

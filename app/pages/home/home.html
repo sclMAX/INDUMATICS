@@ -5,8 +5,8 @@
 </ion-header>
 <ion-content>
   <ion-card>
-    <img  src="img/logoHome.jpg">
-    <button large full> 
+    <img src="img/logoHome.jpg">
+    <button large full *ngIf="!isRegistrado" (click)="goRegistro()"> 
           <ion-icon name="person-add"></ion-icon>
           Registrarse
       </button>
@@ -14,21 +14,20 @@
           <ion-icon name="albums"></ion-icon>
           Catálogos
       </button>
-    <button large full *ngIf="false" >
+    <button large full *ngIf="isUpdateAvailable">
           <ion-icon name="cloud-download"></ion-icon>
-          Actualizar
+          Actualizar Catálogo
       </button>
     <button large full>
           <ion-icon name="cart"></ion-icon>
-          Pedidos
+          Pedido
       </button>
     <button large full (click)="goContacto()">
           <ion-icon name="contacts"></ion-icon>
           Contacto
       </button>
     <ion-list-footer padding>
-      v1.0 by MAX  
+      v1.0 by MAX
     </ion-list-footer>
-
   </ion-card>
 </ion-content>
