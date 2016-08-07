@@ -1,12 +1,12 @@
 import {Component} from '@angular/core';
-import {NavController, Loading} from 'ionic-angular';
+import {NavController, Loading, Toast} from 'ionic-angular';
 import {Platform} from 'ionic-angular';
 import {FormBuilder, ControlGroup, Validators} from '@angular/common';
 import {Usuarios, Usuario} from '../../../providers/usuarios/usuarios';
 
 @Component({
   templateUrl: 'build/pages/usuario//registro/registro.html',
-  providers:[Usuarios]
+  providers: [Usuarios]
 })
 export class RegistroPage {
   usuarioForm: ControlGroup;
@@ -21,8 +21,49 @@ export class RegistroPage {
     this.usuarioForm = this.createForm();
   }
 
+
+  registrarUsuario() {
+    let t = Toast.create({ duration: 2000 });
+    console.log(this.usuario);
+    
+    if (this.usuario.id > 0) { //si tiene un id actualiza los cambios en el servidor 
+      let load = Loading.create({
+        content: 'Guardando datos del usuario...'
+      });
+      this.navCtrl.present(load).then(() => {
+        this.usuariosP.updateUsuario(this.usuario).subscribe(value => {
+
+        }, err => {
+
+        }, () => {
+          load.dismiss();
+        });
+      });
+    } else { //si no, registra el usuario en el servidor
+      let load = Loading.create({
+        content: 'Registrando usuario...'
+      });
+      this.navCtrl.present(load).then(() => {
+        this.usuariosP.registrarUsuario(this.usuario).subscribe(value => {
+          this.usuario = value;
+          t.setMessage('Usuario registrado correctamente con el ID:' + this.usuario.id);
+          this.navCtrl.present(t);
+        }, err => {
+          load.dismiss();
+          t.setMessage('Error al intentar registrar el ususario ERROR: ' + err.message);
+          console.log(err);
+          
+          this.navCtrl.present(t);
+        }, () => {
+          load.dismiss();
+        })
+      });
+    }
+  }
+
   private createForm() {
     return this.formBuilder.group({
+      razonSocial: [''],
       nombre: ['', Validators.required],
       telefono: ['', Validators.required && Validators.minLength(8)],
       email: ['', Validators.required && Validators.minLength(10)],
@@ -34,20 +75,22 @@ export class RegistroPage {
   }
 
   ionViewWillEnter() {
-    let load = Loading.create({
-      content: 'Cargando datos...',
-      showBackdrop: false,
-      dismissOnPageChange: true,
-    });
-    this.navCtrl.present(load).then(() => {
-      this.usuariosP.getUsuario()
-        .subscribe(value => {
-          this.usuario = value;
-        }, err => {
-          console.error.bind(err);
-        }, () => {
-          load.dismiss();
-        });
+    this.platform.ready().then(() => {
+      let load = Loading.create({
+        content: 'Cargando datos...',
+        showBackdrop: false,
+        dismissOnPageChange: true,
+      });
+      this.navCtrl.present(load).then(() => {
+        this.usuariosP.getUsuario()
+          .subscribe(value => {
+            this.usuario = value;
+          }, err => {
+            console.error.bind(err);
+          }, () => {
+            load.dismiss();
+          });
+      });
     });
   }
 

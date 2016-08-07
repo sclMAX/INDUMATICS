@@ -63,7 +63,7 @@ export class Usuarios {
           doc: u
         });
       }).then(doc => {
-        obs.next(doc);
+        obs.next(u);
         obs.complete();
       }).catch(err => {
         obs.error(err);
@@ -133,6 +133,12 @@ export class Usuarios {
       }, () => {
         obs.complete();
       })
+    });
+  }
+
+  public updateUsuario(u: Usuario) {
+    return Observable.create(obs => {
+
     });
   }
 

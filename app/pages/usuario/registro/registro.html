@@ -5,11 +5,11 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding>
-  <form [ngFormModel]="usuarioForm" (ngSubmit)="saveUsuario()">
+  <form [ngFormModel]="usuarioForm" (ngSubmit)="registrarUsuario()">
     <ion-list>
       <ion-item>
         <ion-label primary stacked>Razón Social</ion-label>
-        <ion-input type="text" placeholder="Nombre de la empresa" [(ngModel)]="usuario.razonSocial"></ion-input>
+        <ion-input type="text" ngControl="razonSocial" placeholder="Nombre de la empresa" [(ngModel)]="usuario.razonSocial"></ion-input>
       </ion-item>
       <ion-item>
         <ion-label primary stacked>Persona de contacto</ion-label>
@@ -44,7 +44,4 @@
     <ion-icon name="person-add"></ion-icon>
   </button>
   </form>
-  <button fab fab-bottom fab-rigth [disabled]="!isInDB" (click)="borrarDB()">
-    <ion-icon name="trash"></ion-icon>
-  </button>
 </ion-content>
