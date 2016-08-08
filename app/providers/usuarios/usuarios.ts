@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http, RequestOptions, Headers } from '@angular/http';
+import * as ResponseClass from '../clases/response';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 let PouchDB = require('pouchdb');
@@ -64,14 +65,12 @@ export class Usuarios {
         });
       }).then(doc => {
         obs.next(u);
-        obs.complete();
       }).catch(err => {
         this.db.put({
           _id: 'usuario',
           doc: u,
         }).then(() => {
           obs.next(u);
-          obs.complete()
         }).catch(err => {
           obs.error(err);
         })
@@ -100,6 +99,13 @@ export class Usuarios {
     return this.http.post(url, {}, options).map(res => res.json());
   }
 
+  /**
+   * 
+   * 
+   * @private
+   * @param {Usuario} u
+   * @returns Response del servidor
+   */
   private serverUpdateUsuario(u: Usuario) {
     let usuario = JSON.stringify(u);
     let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -115,6 +121,8 @@ export class Usuarios {
    * @returns
    * Exito: {Usuario} con el id del servido incorporado
    * Falla: {Response} del servidor
+   * code = RES_OK = 200/RES_ACCESO_DENEGADO = 401;RES_SERVER_ERROR = 500;
+   *     RES_DATABASE_ERROR = 510;RES_FALTAN_PARAMETROS = 422;RES_NO_EN_DB = 410;RES_DB_KEY_ERROR = 23000;
    */
   public registrarUsuario(u: Usuario) {
     return Observable.create(obs => {
@@ -126,7 +134,8 @@ export class Usuarios {
               obs.next(u);
               obs.complete();
             }, err => {
-              obs.error(err);
+              let res = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Registro realizado correctamente en el servidor, pero no se pudieron gurdara los cambios localmente!');
+              obs.error(res);
             }, () => {
               obs.complete();
             });
@@ -137,22 +146,31 @@ export class Usuarios {
           obs.error(value);
         }
       }, err => {
-        obs.error(err);
+        let res = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, "Sin conexion");
+        obs.error(res);
       }, () => {
         obs.complete();
       })
     });
   }
 
+  /**
+   * Actualiza los datos del usuario en el servidor
+   * 
+   * @param {Usuario} u
+   * @returns
+   * Exito:  {Usuario}
+   * Falla: {Response}
+   */
   public updateUsuario(u: Usuario) {
     return Observable.create(obs => {
       this.serverUpdateUsuario(u).subscribe(res => {
         if (res.response) {
           this.localSaveUsuario(u).subscribe(value => {
             obs.next(u);
-            obs.complete();
           }, err => {
-            obs.error(err);
+            let r = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al gurdar los datos localmente');
+            obs.error(r);
           }, () => {
             obs.complete();
           })
@@ -160,10 +178,28 @@ export class Usuarios {
           obs.error(res)
         }
       }, err => {
-        obs.error(err);
+        let r = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'Sin Conexión');
+        obs.error(r);
       }, () => {
         obs.complete();
       })
+    });
+  }
+
+  public recuperarCuenta(u: Usuario, codigo: number, id: number) {
+    return Observable.create(obs => {
+      let c: number = codigo * 1;
+      if (c == id) {//Si el codigo es correcto se guardan los cambios con el ID recibido
+        u.id = id;
+        this.updateUsuario(u).subscribe(res => {
+          obs.next(res);
+        }, err => {
+          obs.error(err);
+        }, () => { obs.complete(); });
+      } else {
+        let r = new ResponseClass.Response(false, ResponseClass.RES_ACCESO_DENEGADO, 'Codigo Incorrecto');
+        obs.error(r);
+      }
     });
   }
 
