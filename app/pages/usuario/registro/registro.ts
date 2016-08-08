@@ -25,23 +25,28 @@ export class RegistroPage {
   registrarUsuario() {
     let t = Toast.create({ duration: 2000 });
     console.log(this.usuario);
-    
+
     if (this.usuario.id > 0) { //si tiene un id actualiza los cambios en el servidor 
       let load = Loading.create({
         content: 'Guardando datos del usuario...'
       });
       this.navCtrl.present(load).then(() => {
         this.usuariosP.updateUsuario(this.usuario).subscribe(value => {
-
+          t.setMessage('Usuario actualizado correctamente');
+          this.navCtrl.present(t);
         }, err => {
-
+          load.dismiss().then(() => {
+            t.setMessage('Error al actualizar los datos ERROR:' + err);
+            this.navCtrl.present(t);
+          });
+          console.log(err);
         }, () => {
           load.dismiss();
         });
       });
     } else { //si no, registra el usuario en el servidor
       let load = Loading.create({
-        content: 'Registrando usuario...'
+        content: 'Registrar usuario...'
       });
       this.navCtrl.present(load).then(() => {
         this.usuariosP.registrarUsuario(this.usuario).subscribe(value => {
@@ -52,7 +57,6 @@ export class RegistroPage {
           load.dismiss();
           t.setMessage('Error al intentar registrar el ususario ERROR: ' + err.message);
           console.log(err);
-          
           this.navCtrl.present(t);
         }, () => {
           load.dismiss();
@@ -85,6 +89,7 @@ export class RegistroPage {
         this.usuariosP.getUsuario()
           .subscribe(value => {
             this.usuario = value;
+            if (this.usuario.id > 0) { this.title = 'Modificar datos...' };
           }, err => {
             console.error.bind(err);
           }, () => {

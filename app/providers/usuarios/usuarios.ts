@@ -58,7 +58,7 @@ export class Usuarios {
       if (!this.db) { this.initDB() };
       this.db.get('usuario').then(doc => {
         return this.db.put({
-          _id: doc._id,
+          _id: 'usuario',
           _rev: doc._rev,
           doc: u
         });
@@ -66,7 +66,15 @@ export class Usuarios {
         obs.next(u);
         obs.complete();
       }).catch(err => {
-        obs.error(err);
+        this.db.put({
+          _id: 'usuario',
+          doc: u,
+        }).then(() => {
+          obs.next(u);
+          obs.complete()
+        }).catch(err => {
+          obs.error(err);
+        })
       });
     });
   }
@@ -138,7 +146,24 @@ export class Usuarios {
 
   public updateUsuario(u: Usuario) {
     return Observable.create(obs => {
-
+      this.serverUpdateUsuario(u).subscribe(res => {
+        if (res.response) {
+          this.localSaveUsuario(u).subscribe(value => {
+            obs.next(u);
+            obs.complete();
+          }, err => {
+            obs.error(err);
+          }, () => {
+            obs.complete();
+          })
+        } else {
+          obs.error(res)
+        }
+      }, err => {
+        obs.error(err);
+      }, () => {
+        obs.complete();
+      })
     });
   }
 
