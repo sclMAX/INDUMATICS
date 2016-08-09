@@ -6,26 +6,21 @@
 <ion-content>
   <ion-card>
     <img src="img/logoHome.jpg">
-    <button large full *ngIf="!isRegistrado" (click)="goRegistro()"> 
-          <ion-icon name="person-add"></ion-icon>
-          Registrarse
-      </button>
-    <button large full (click)="goCatalogo()"> 
-          <ion-icon name="albums"></ion-icon>
-          Catálogos
-      </button>
-    <button large full *ngIf="isUpdateAvailable" (click)="pruebaColores()">
-          <ion-icon name="cloud-download"></ion-icon>
-          Actualizar Catálogo
-      </button>
-    <button large full>
-          <ion-icon name="cart"></ion-icon>
-          Pedido
-      </button>
+    <button large full *ngIf="!isRegistrado" (click)="goRegistro()">
+      <ion-icon name="person-add"></ion-icon> Registrarse
+    </button>
+    <button large full (click)="goCatalogo()">
+      <ion-icon name="albums"></ion-icon> Catálogos
+    </button>
+    <button large full *ngIf="isUpdateAvailable">
+      <ion-icon name="cloud-download"></ion-icon> Actualizar Catálogo
+    </button>
+    <button large full (click)="goPedidos()">
+      <ion-icon name="cart"></ion-icon> Pedidos
+    </button>
     <button large full (click)="goContacto()">
-          <ion-icon name="contacts"></ion-icon>
-          Contacto
-      </button>
+      <ion-icon name="contacts"></ion-icon> Contacto
+    </button>
     <ion-list-footer padding>
       v1.0 by MAX
     </ion-list-footer>

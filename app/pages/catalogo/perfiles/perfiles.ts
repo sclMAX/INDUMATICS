@@ -4,6 +4,8 @@ import {Linea} from '../../../providers/lineas/lineas';
 import {HomePage} from '../../home/home';
 import {Perfiles, Perfil} from '../../../providers/perfiles/perfiles';
 import {PerfilesDetallePage} from '../perfiles-detalle/perfiles-detalle';
+import {PedidoAddItemPage} from '../../pedidos/pedido-add-item/pedido-add-item';
+import {PedidosPage} from '../../pedidos/pedidos';
 
 
 @Component({
@@ -25,8 +27,16 @@ export class PerfilesPage {
     this.navCtrl.setRoot(HomePage);
   }
 
+  goPedidos() {
+    this.navCtrl.push(PedidosPage);
+  }
+
   goPerfil(perfil: Perfil) {
     this.navCtrl.push(PerfilesDetallePage, { 'perfil': perfil });
+  }
+
+  addPedido(perfil: Perfil) {
+    this.navCtrl.push(PedidoAddItemPage, { 'perfil': perfil });
   }
 
   filtrar(ev) {

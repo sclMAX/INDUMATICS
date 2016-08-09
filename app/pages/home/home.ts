@@ -1,15 +1,15 @@
 import {Component} from '@angular/core';
 import {NavController, Platform} from 'ionic-angular';
 import {Usuarios, Usuario} from '../../providers/usuarios/usuarios';
-import {Colores} from '../../providers/colores/colores'; //QUITAR ES SOLO PARA PRUEBA
 import {ContactoPage} from '../contacto/contacto';
 import {RegistroPage} from '../usuario/registro/registro';
 import {CatalogoPage} from '../catalogo/catalogo';
+import {PedidosPage} from '../pedidos/pedidos';
 
 
 @Component({
   templateUrl: 'build/pages/home/home.html',
-  providers: [Usuarios, Colores],
+  providers: [Usuarios],
 })
 export class HomePage {
   title: string;
@@ -17,7 +17,7 @@ export class HomePage {
   isUpdateAvailable: boolean = true;
 
   constructor(public navCtrl: NavController, private platform: Platform,
-    private usuariosP: Usuarios, private coloresP: Colores) {
+    private usuariosP: Usuarios) {
     this.title = "INDUMATICS S.A.";
   }
 
@@ -29,18 +29,12 @@ export class HomePage {
     this.navCtrl.push(RegistroPage);
   }
 
-  goCatalogo() {
-    this.navCtrl.push(CatalogoPage);
+  goPedidos() {
+    this.navCtrl.push(PedidosPage);
   }
 
-  pruebaColores() {//QUITAR SOLO ES PARA PRUEBA DE COLORES
-    this.coloresP.getAll().subscribe(col => {
-      console.log('EXITO:', col);
-    }, err => {
-      console.log('ERROR:', err);
-    },() => {
-      console.log('FIN');
-    });
+  goCatalogo() {
+    this.navCtrl.push(CatalogoPage);
   }
 
   ionViewWillEnter() {
