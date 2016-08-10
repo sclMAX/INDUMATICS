@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, Alert, Toast} from 'ionic-angular';
 import {Pedidos, Pedido, Item} from '../../../providers/pedidos/pedidos';
 import {CatalogoPage} from '../../catalogo/catalogo';
+import {PerfilesDetallePage} from '../../catalogo/perfiles-detalle/perfiles-detalle';
 
 
 @Component({
@@ -25,6 +26,10 @@ export class PedidoDetallePage {
 
   goCatalogo() {
     this.navCtrl.push(CatalogoPage);
+  }
+
+  goPerfil(item: Item) {
+    this.navCtrl.push(PerfilesDetallePage, {'perfil': item.perfil, 'add': false})
   }
 
   selectIsPedido(isPedido: boolean) {

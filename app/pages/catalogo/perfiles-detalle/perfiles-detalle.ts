@@ -10,9 +10,11 @@ import {PedidoAddItemPage} from '../../pedidos/pedido-add-item/pedido-add-item';
 export class PerfilesDetallePage {
   title: string;
   perfil: Perfil;
+  isAddPosible: boolean;
 
   constructor(private nav: NavController, private parametros: NavParams) {
     this.perfil = this.parametros.get('perfil');
+    this.isAddPosible = this.parametros.get('add');
     this.title = 'Perfil ' + this.perfil.idPerfil;
   }
 

@@ -32,7 +32,7 @@ export class PerfilesPage {
   }
 
   goPerfil(perfil: Perfil) {
-    this.navCtrl.push(PerfilesDetallePage, { 'perfil': perfil });
+    this.navCtrl.push(PerfilesDetallePage, { 'perfil': perfil, 'add': true });
   }
 
   addPedido(perfil: Perfil) {

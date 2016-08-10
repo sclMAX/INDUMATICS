@@ -27,7 +27,7 @@
 </ion-header>
 <ion-content>
   <ion-list text-wrap>
-    <ion-item-sliding *ngFor="let item of items">
+    <ion-item-sliding tappable *ngFor="let item of items" (click)="goPerfil(item)">
       <ion-item>
         <ion-grid>
           <ion-row>

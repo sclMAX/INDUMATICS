@@ -6,7 +6,7 @@
 <ion-content>
 
   <ion-card>
-    <button fab fab-top fab-right (click)="addPedido(perfil)">
+    <button fab fab-top fab-right *ngIf="isAddPosible"  (click)="addPedido(perfil)">
       <ion-icon name="cart"></ion-icon>
     </button>
     <img src="http://www.indumatics.com.ar/home/img/perfiles/sm/{{perfil.idPerfil}}.png" />
