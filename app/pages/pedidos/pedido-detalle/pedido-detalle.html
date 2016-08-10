@@ -27,7 +27,7 @@
 </ion-header>
 <ion-content>
   <ion-list text-wrap>
-    <ion-item-sliding tappable *ngFor="let item of items" (click)="goPerfil(item)">
+    <ion-item-sliding  *ngFor="let item of items" >
       <ion-item>
         <ion-grid>
           <ion-row>
@@ -39,6 +39,7 @@
         </ion-grid>
       </ion-item>
       <ion-item-options>
+        <button secondary (click)="goPerfil(item)"><ion-icon name="eye"></ion-icon></button>
         <button light [disabled]="!(item.cantidad > 1)" (click)="decCantidad(item)"><ion-icon name="remove-circle"></ion-icon></button>
         <button light (click)="incCantidad(item)"><ion-icon name="add-circle"></ion-icon></button>
         <button danger (click)="removeItem(item)"><ion-icon name="trash"></ion-icon></button>
@@ -48,10 +49,11 @@
 
 </ion-content>
 <ion-footer>
-  <button fab fab-bottom fab-rigth [disabled]="isModify" (click)="goConfiguracion()">
+  <button fab fab-bottom fab-rigth [disabled]="isModify" *ngIf="isEdit" (click)="goConfig()">
     <ion-icon name="options"></ion-icon>
   </button>
-  <button fab fab-bottom fab-center [disabled]="(!pedido || isModify || !(items.length > 0) || !pedido.usuario)" (click)="sendPedido()">
+  <button fab fab-bottom fab-center [disabled]="(!pedido || isModify || !(items.length > 0) || !pedido.idUsuario)" *ngIf="isEdit"
+    (click)="sendPedido()">
     <ion-icon name="send" ></ion-icon>
   </button>
 </ion-footer>

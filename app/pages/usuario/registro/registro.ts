@@ -15,6 +15,7 @@ export class RegistroPage {
   usuarioForm: ControlGroup;
   title: string;
   usuario: Usuario;
+  isChange: boolean = false;
 
 
   constructor(public navCtrl: NavController, private formBuilder: FormBuilder,
@@ -27,6 +28,7 @@ export class RegistroPage {
 
   registrarUsuario() {
     let t = Toast.create({ duration: 2000 });
+    this.isChange = false;
     if (this.usuario.id > 0) { //si tiene un id actualiza los cambios en el servidor 
       let load = Loading.create({
         content: 'Guardando datos del usuario...'
@@ -138,6 +140,10 @@ export class RegistroPage {
           });
       });
     });
+  }
+
+  onChange() {
+    this.isChange = true;
   }
 
 }

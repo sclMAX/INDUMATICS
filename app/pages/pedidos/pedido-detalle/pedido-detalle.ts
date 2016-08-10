@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Alert, Toast} from 'ionic-angular';
+import { NavController, NavParams, Loading, Alert, Toast} from 'ionic-angular';
 import {Pedidos, Pedido, Item} from '../../../providers/pedidos/pedidos';
 import {CatalogoPage} from '../../catalogo/catalogo';
 import {PerfilesDetallePage} from '../../catalogo/perfiles-detalle/perfiles-detalle';
+import {PedidoConfigPage} from '../pedido-config/pedido-config';
+import {HomePage} from '../../home/home';
 
 
 @Component({
@@ -18,7 +20,6 @@ export class PedidoDetallePage {
 
   constructor(private navCtrl: NavController, private parametros: NavParams, private pedidosP: Pedidos) {
     this.pedido = this.parametros.get('pedido');
-    this.pedido.isPedido = true;
     this.items = this.pedido.detalle;
     this.isEdit = this.parametros.get('edit');
     this.title = 'Pedido ' + ((this.isEdit) ? 'Actual' : this.pedido.id);
@@ -29,11 +30,40 @@ export class PedidoDetallePage {
   }
 
   goPerfil(item: Item) {
-    this.navCtrl.push(PerfilesDetallePage, {'perfil': item.perfil, 'add': false})
+    this.navCtrl.push(PerfilesDetallePage, { 'perfil': item.perfil, 'add': false })
+  }
+
+  goConfig() {
+    this.navCtrl.push(PedidoConfigPage, { 'pedido': this.pedido });
   }
 
   selectIsPedido(isPedido: boolean) {
     this.pedido.isPedido = isPedido;
+  }
+
+  sendPedido() {
+    let load = Loading.create({
+      content: 'Enviando pedido...',
+      duration: 3000
+    });
+    let t = Toast.create({ duration: 3000 });
+    this.navCtrl.present(load).then(() => {
+      this.pedidosP.sendPedido(this.pedido).subscribe(res => {
+        this.navCtrl.setRoot(HomePage);
+        load.dismiss().then(() => {
+          t.setMessage(res.message);
+          this.navCtrl.present(t);
+        });
+      }, err => {
+        console.log(err);
+        load.dismiss().then(() => {
+          t.setMessage(err.message);
+          this.navCtrl.present(t);
+        });
+      }, () => {
+        load.dismiss();
+      })
+    });
   }
 
   saveChanges() {
