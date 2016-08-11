@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Loading, Alert, Toast} from 'ionic-angular';
+import { NavController, NavParams, Platform, Loading, Alert, Toast} from 'ionic-angular';
 import {Pedidos, Pedido, Item} from '../../../providers/pedidos/pedidos';
 import {CatalogoPage} from '../../catalogo/catalogo';
 import {PerfilesDetallePage} from '../../catalogo/perfiles-detalle/perfiles-detalle';
@@ -18,11 +18,16 @@ export class PedidoDetallePage {
   items: Array<Item>;
   isModify: boolean;
 
-  constructor(private navCtrl: NavController, private parametros: NavParams, private pedidosP: Pedidos) {
+  constructor(private navCtrl: NavController, private parametros: NavParams,
+    private pedidosP: Pedidos, private platform: Platform) {
     this.pedido = this.parametros.get('pedido');
     this.items = this.pedido.detalle;
     this.isEdit = this.parametros.get('edit');
-    this.title = 'Pedido ' + ((this.isEdit) ? 'Actual' : this.pedido.id);
+    if (!this.isEdit) {
+      this.title = ((this.pedido.isPedido) ? 'PEDIDO ' : 'PRESUPUESTO ') + 'Nro:000' + this.pedido.id;
+    }else{
+      this.title = "Pendiente de Envio";
+    }
   }
 
   goCatalogo() {
@@ -55,7 +60,6 @@ export class PedidoDetallePage {
           this.navCtrl.present(t);
         });
       }, err => {
-        console.log(err);
         load.dismiss().then(() => {
           t.setMessage(err.message);
           this.navCtrl.present(t);

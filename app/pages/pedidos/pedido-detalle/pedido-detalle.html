@@ -1,6 +1,8 @@
 <ion-header>
   <ion-navbar primary>
-    <ion-title>{{title}}</ion-title>
+    <ion-title>
+      {{title}}
+    </ion-title>
     <ion-buttons end>
       <button [disabled]="isModify" paceholder="Catalogo..." (click)="goCatalogo()">
         <ion-icon name="albums"></ion-icon>
@@ -8,6 +10,7 @@
     </ion-buttons>
   </ion-navbar>
   <ion-list-header>
+    <p *ngIf="!isEdit">{{pedido.comentarios}}</p>
     Total estimado: {{calculaTotal()|number:'1.2-2'}} Kg.
   </ion-list-header>
   <ion-grid>
@@ -27,7 +30,7 @@
 </ion-header>
 <ion-content>
   <ion-list text-wrap>
-    <ion-item-sliding  *ngFor="let item of items" >
+    <ion-item-sliding *ngFor="let item of items">
       <ion-item>
         <ion-grid>
           <ion-row>

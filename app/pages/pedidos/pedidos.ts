@@ -24,13 +24,13 @@ export class PedidosPage {
   }
 
   goPedido(pedido: Pedido) {
-    this.navCtrl.push(PedidoDetallePage, { 'pedido': pedido, 'edit': true });
+    this.navCtrl.push(PedidoDetallePage, { 'pedido': pedido, 'edit': false });
   }
 
   removeItem(pedido: Pedido) {
     let confirm = Alert.create({
-      title: 'Quitar Item?',
-      message: 'Esta seguro que desea quitar el pedido Nro:000' + pedido.id,
+      title: 'Quitar de historial...',
+      message: 'Esta seguro que desea quitar el pedido Nro:000' + pedido.id + '?. Solo elimina el pedido del historial local (no lo anula en el servidor).',
       buttons: [{ text: 'Cancelar' },
         {
           text: 'Aceptar',

@@ -75,7 +75,7 @@ export class Pedidos {
     let ps = new PedidoServer();
     ps.id = 0;
     ps.idUsuario = p.idUsuario * 1;
-    ps.isPedido = p.isPedido;
+    ps.isPedido = p.isPedido;    
     ps.fecha = p.fecha;
     ps.isEnviado = p.isEnviado;
     ps.isProcesado = p.isProcesado;
@@ -175,9 +175,8 @@ export class Pedidos {
   private setActualToEnviado(pedido: Pedido, enviados: Array<Pedido>) {
     return Observable.create(obs => {
       pedido.isEnviado = true;
-      let pedidoEnviar: any = this.convertToServer(<Pedido>JSON.parse(JSON.stringify(pedido)));
+      let pedidoEnviar: any = this.convertToServer(pedido);
       this.serverSend(pedidoEnviar).subscribe(res => { //Envia el pedido al servidor
-        console.log('OK:', res);
         if (res.response) { //Exito
           pedido.id = res.result;
           enviados.push(pedido);
@@ -196,7 +195,6 @@ export class Pedidos {
             obs.next(r);
           });
         } else { //Si falla al enviar al servidor retorna el error del servidor
-          console.log('ERROR EN EL SERVIDOR:', res)
           obs.error(res);
         }
       }, err => {
