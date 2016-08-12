@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import 'rxjs/add/operator/map';
 import * as ResponseClass from '../clases/response';
 import {Linea} from '../lineas/lineas';
+import {Estados, Estado} from '../estados/estados';
 
 let PouchDB = require('pouchdb');
 const apiUrl: string = 'http://www.indumatics.com.ar/api/perfiles/';
@@ -22,9 +23,13 @@ export class Perfiles {
   private db: any;
   private perfiles: Array<Perfil>;
 
-  constructor(private http: Http) { }
+  constructor(private http: Http, private estadosP: Estados) { }
 
   private initDB() { this.db = PouchDB('perfiles', { adapter: 'websql' }) }
+
+  private setEstado() {
+    this.estadosP.setCatalogoVersionNow();
+  }
 
   /**
    * Descarga los perfiles del servidor
@@ -58,12 +63,14 @@ export class Perfiles {
           doc: p
         });
       }).then(() => {
+        this.setEstado();
         obs.next(p);
       }).catch(err => {
         this.db.put({
           _id: 'perfil',
           doc: p
         }).then(() => {
+          this.setEstado();
           obs.next(p);
         }).catch(err => {
           let r = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'No se pudo gurdar el cache local');
@@ -152,6 +159,8 @@ export class Perfiles {
       });
     }
   }
+
+
 
 
 }
