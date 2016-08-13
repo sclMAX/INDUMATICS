@@ -18,6 +18,8 @@ export class Estado {
   constructor() {
     this.isLeido = false;
     this.catalogoVersion = new Date();
+    this.appVersion = 1;
+    this.novedades = '';
   }
 }
 
@@ -58,7 +60,7 @@ export class Estados {
       return this.db.put({
         _id: id,
         doc: estado
-      })
+      });
     });
   }
 
@@ -72,14 +74,20 @@ export class Estados {
       this.localGet(idL).then(estado => {
         if (estado) {
           estado.catalogoVersion = new Date();
-          this.updateLocalEstado(estado).subscribe(res => {
-            obs.next(res.response);
-          })
         } else {
-          obs.next(false);
+          estado = new Estado();
         }
+        this.updateLocalEstado(estado).subscribe(res => {
+          obs.next(res.response);
+        }, err => {
+          obs.error(err);
+        });
       }).catch(() => {
-        obs.error();
+        this.updateLocalEstado(new Estado()).subscribe(res => {
+          obs.next(res.response);
+        }, err => {
+          obs.error(err);
+        });
       })
     });
   }

@@ -97,20 +97,25 @@ export class Lineas {
    * Exito: {Array<Linea>}
    * Falla: {Response} 
    */
-  public getAll() {
+  public getAll(): Observable<Array<Linea>> {
     if (this.lineas) {
-      return Observable.create(obs => { obs.next(this.lineas) });
+      return Observable.create(obs => {
+        obs.next(this.lineas);
+        obs.complete();
+      });
     } else {
       return Observable.create(obs => {
         this.localGetLineas().subscribe(res => { //Busca las lineas loaclmente y la retorna
           this.lineas = res;
           obs.next(this.lineas);
+          obs.complete();
         }, err => { //Si no encuentra localmente busca en el servidor
           this.serverGetLineas().subscribe(res => {
             if (res.response) { //si se lograron descargar intenta guardarlas localmente y retorna las lineas
               this.lineas = <Array<Linea>>res.result;
               this.localSaveLineas(this.lineas).subscribe(res => {
                 obs.next(this.lineas);
+                obs.complete();
               }, err => {
                 obs.next(this.lineas);
               });

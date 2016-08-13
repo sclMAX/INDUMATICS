@@ -54,11 +54,11 @@ export class RegistroPage {
       });
       this.navCtrl.present(load).then(() => {
         this.usuariosP.registrarUsuario(this.usuario).subscribe(value => {
-          this.usuario = value;
+          this.usuario = value.result;
           load.dismiss().then(() => {
             t.setMessage('Usuario registrado correctamente con el ID:' + this.usuario.id);
-            this.navCtrl.present(t);
             this.navCtrl.setRoot(HomePage);
+            this.navCtrl.present(t);
           });
         }, err => {
           load.dismiss().then(() => {
@@ -88,8 +88,8 @@ export class RegistroPage {
                         this.navCtrl.present(t);
                       }, () => {
                         t.setMessage('Datos guardados correctamente!');
-                        this.navCtrl.present(t);
                         this.navCtrl.setRoot(HomePage);
+                        this.navCtrl.present(t);
                       });
                     }
                   }

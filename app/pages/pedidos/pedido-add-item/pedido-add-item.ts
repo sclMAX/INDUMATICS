@@ -27,8 +27,8 @@ export class PedidoAddItemPage {
   }
   private createForm() {
     return this.formBuilder.group({
-      cantidad: ['', Validators.required],
-      color: ['', Validators.required]
+      cantidad: ['', Validators.required && Validators.nullValidator && Validators.pattern('^[1-9][0-9]*$')],
+      color: ['', Validators.required && Validators.nullValidator]
     });
   }
 

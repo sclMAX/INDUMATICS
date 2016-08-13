@@ -26,7 +26,6 @@ export class CatalogoPage {
       if (!this.lineas) {
         let load = Loading.create({
           content: 'Cargando lineas disponibles...',
-          showBackdrop: false,
           dismissOnPageChange: true,
         });
         this.navCtrl.present(load).then(() => {

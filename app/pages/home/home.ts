@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController, Platform, Toast} from 'ionic-angular';
 import {Usuarios, Usuario} from '../../providers/usuarios/usuarios';
-import {Estados} from '../../providers/estados/estados';
+import {Estados, Estado} from '../../providers/estados/estados';
 import {ContactoPage} from '../contacto/contacto';
 import {RegistroPage} from '../usuario/registro/registro';
 import {CatalogoPage} from '../catalogo/catalogo';
@@ -38,6 +38,14 @@ export class HomePage {
 
   goCatalogo() {
     this.navCtrl.push(CatalogoPage);
+  }
+
+  goUpdate() {
+    this.estadosP.updateLocalEstado(new Estado()).subscribe(res=>{
+      console.log('RESPUESTA:',res);
+    },err=>{
+      console.error.bind(err);
+    })
   }
 
   ionViewWillEnter() {

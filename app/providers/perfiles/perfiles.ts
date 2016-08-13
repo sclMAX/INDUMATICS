@@ -28,7 +28,7 @@ export class Perfiles {
   private initDB() { this.db = PouchDB('perfiles', { adapter: 'websql' }) }
 
   private setEstado() {
-    this.estadosP.setCatalogoVersionNow();
+    this.estadosP.setCatalogoVersionNow().subscribe();
   }
 
   /**

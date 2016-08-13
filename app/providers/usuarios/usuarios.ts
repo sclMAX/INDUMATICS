@@ -30,7 +30,7 @@ export class Usuarios {
     this.db = new PouchDB('usuarios', { adapter: 'websql' });
   }
 
-  private localGetUsuario() {
+  private localGetUsuario(): Observable<Usuario> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB() };
       this.db.get('usuario').then(value => {
@@ -50,11 +50,10 @@ export class Usuarios {
    * 
    * @private
    * @param {Usuario} u
-   * @returns 
-   * Exito: {Usuario} guardado
-   * Falla: Observable.error(error)
+   * @returns {Observable<ResponseClass.Response>}
+   * 
    */
-  private localSaveUsuario(u: Usuario) {
+  private localSaveUsuario(u: Usuario): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB() };
       this.db.get('usuario').then(doc => {
@@ -64,13 +63,17 @@ export class Usuarios {
           doc: u
         });
       }).then(doc => {
-        obs.next(u);
+        let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Usuario Actualizado Correctamente!');
+        response.result = u;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'usuario',
           doc: u,
         }).then(() => {
-          obs.next(u);
+          let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Usuario Ingresado Correctamente!');
+          response.result = u;
+          obs.next(response);
         }).catch(err => {
           obs.error(err);
         })
@@ -83,7 +86,7 @@ export class Usuarios {
    * 
    * @private
    * @param {Usuario} u
-   * @returns Observable 
+   * @returns {Observable<ResponseClass.Response>}
    * result: id generado en el servidor / null ,
    *  response = true/false,
    *  message = string descriptivo,
@@ -91,7 +94,7 @@ export class Usuarios {
    *     RES_DATABASE_ERROR = 510;RES_FALTAN_PARAMETROS = 422;RES_NO_EN_DB = 410;RES_DB_KEY_ERROR = 23000;
    * 
    */
-  private serverRegitrarUsuario(u: Usuario) {
+  private serverRegitrarUsuario(u: Usuario): Observable<ResponseClass.Response> {
     let usuario = JSON.stringify(u);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
@@ -100,13 +103,13 @@ export class Usuarios {
   }
 
   /**
-   * 
+   * Actualiza los datos del Usuario en el Servidor
    * 
    * @private
    * @param {Usuario} u
-   * @returns Response del servidor
+   * @returns {Observable<ResponseClass.Response>}
    */
-  private serverUpdateUsuario(u: Usuario) {
+  private serverUpdateUsuario(u: Usuario): Observable<ResponseClass.Response> {
     let usuario = JSON.stringify(u);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
@@ -118,26 +121,26 @@ export class Usuarios {
    * Intenta registrar un usuario en el servidor, si lo logra lo guarda localmente
    * 
    * @param {Usuario} u
-   * @returns
-   * Exito: {Usuario} con el id del servido incorporado
+   * @returns Observable<ResponseClass.Response>
+   * Exito: {Response.result = Usuario} con el id del servido incorporado
    * Falla: {Response} del servidor
    * code = RES_OK = 200/RES_ACCESO_DENEGADO = 401;RES_SERVER_ERROR = 500;
    *     RES_DATABASE_ERROR = 510;RES_FALTAN_PARAMETROS = 422;RES_NO_EN_DB = 410;RES_DB_KEY_ERROR = 23000;
    */
-  public registrarUsuario(u: Usuario) {
+  public registrarUsuario(u: Usuario): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       this.serverRegitrarUsuario(u).subscribe(value => {
         if (value.response) {
           u.id = <number>value.result;
           if (u.id) {
             this.localSaveUsuario(u).subscribe(res => {
-              obs.next(u);
+              let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Registro realizado correctamente en el servidor');
+              response.result = u;
+              obs.next(response);
               obs.complete();
             }, err => {
               let res = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Registro realizado correctamente en el servidor, pero no se pudieron gurdara los cambios localmente!');
               obs.error(res);
-            }, () => {
-              obs.complete();
             });
           } else {
             obs.error(value);
@@ -148,9 +151,7 @@ export class Usuarios {
       }, err => {
         let res = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, "Sin conexion");
         obs.error(res);
-      }, () => {
-        obs.complete();
-      })
+      });
     });
   }
 
@@ -158,35 +159,41 @@ export class Usuarios {
    * Actualiza los datos del usuario en el servidor
    * 
    * @param {Usuario} u
-   * @returns
-   * Exito:  {Usuario}
+   * @returns Observable<ResponseClass.Response>
+   * Exito:  {Response.result = Usuario}
    * Falla: {Response}
    */
-  public updateUsuario(u: Usuario) {
+  public updateUsuario(u: Usuario): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       this.serverUpdateUsuario(u).subscribe(res => {
         if (res.response) {
           this.localSaveUsuario(u).subscribe(value => {
-            obs.next(u);
+            obs.next(value);
           }, err => {
             let r = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al gurdar los datos localmente');
             obs.error(r);
-          }, () => {
-            obs.complete();
-          })
+          });
         } else {
           obs.error(res)
         }
       }, err => {
         let r = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'Sin Conexión');
         obs.error(r);
-      }, () => {
-        obs.complete();
-      })
+      });
     });
   }
 
-  public recuperarCuenta(u: Usuario, codigo: number, id: number) {
+  /**
+     * Chequea el codigo de recuperacion y actualiza los datos en el servidor
+     * 
+     * @param {Usuario} u ,
+     * {number} codigo = Codigo de recuperacion,
+     * {number} id = id de la cuenta asociada al email en el servidor
+     * @returns Observable<ResponseClass.Response>
+     * Exito:  {Response.result = Usuario}
+     * Falla: {Response}
+     */
+  public recuperarCuenta(u: Usuario, codigo: number, id: number): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       let c: number = codigo * 1;
       if (c == id) {//Si el codigo es correcto se guardan los cambios con el ID recibido
@@ -203,7 +210,7 @@ export class Usuarios {
     });
   }
 
-  public getUsuario() {
+  public getUsuario():Observable<Usuario> {
     return Observable.create(obs => {
       this.localGetUsuario().subscribe(value => {
         this.usuario = value;
