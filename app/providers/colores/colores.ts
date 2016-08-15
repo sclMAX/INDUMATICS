@@ -28,11 +28,12 @@ export class Colores {
    * 
    * @private
    * @param {Array<Color>} data
-   * @returns {Observable}
+   * @returns {Observable<ResponseClass.Response> }
    * Exito: {Array<Color>}
    * Falla: Observable.error(error)
    */
-  private localSaveColores(data: Array<Color>) {
+  private localSaveColores(data: Array<Color>): Observable<ResponseClass.Response> {
+    let response: ResponseClass.Response;
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('color').then(doc => {
@@ -42,15 +43,21 @@ export class Colores {
           doc: data
         });
       }).then(res => {
-        obs.next(data);
+        response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos actualizados correctamente');
+        response.result = data;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'color',
           doc: data
         }).then(() => {
-          obs.next(data);
+          response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos ingresados correctamente');
+          response.result = data;
+          obs.next(response);
         }).catch(err => {
-          obs.error(err);
+          response = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al guardar localmente');
+          response.result = err;
+          obs.error(response);
         })
       });
     });
@@ -60,11 +67,11 @@ export class Colores {
    * Busca Colores en el cache local
    * 
    * @private
-   * @returns {Observable}
+   * @returns {Observable<Array<Color>>}
    * Exito: {Array<Color>}
    * Falla: Observable.error(error)
    */
-  private localGetAll() {
+  private localGetAll(): Observable<Array<Color>> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('color').then(doc => {
@@ -79,10 +86,10 @@ export class Colores {
    * Descarga los Colores del servidor
    * 
    * @private
-   * @returns {Observable}
+   * @returns {Observable<ResponseClass.Response>}
    * Exito/Falla: {Response}
    */
-  private serverGetAll() {
+  private serverGetAll(): Observable<ResponseClass.Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     let url: string = apiUrl;
@@ -92,11 +99,11 @@ export class Colores {
   /**
    * Retorna los Colores 
    * 
-   * @returns {Observable}
+   * @returns {Observable<Array<Color>> }
    * Exito: {Array<Color>}
    * Falla: {Rosponse}
    */
-  public getAll() {
+  public getAll(): Observable<Array<Color>> {
     if (this.colores) {
       return Observable.create(obs => {
         obs.next(this.colores);
@@ -128,5 +135,36 @@ export class Colores {
       })
     }
   }
+
+  public update(): Observable<ResponseClass.Response> {
+    return Observable.create(obs => {
+      let response: ResponseClass.Response;
+      response = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'No se pudos actualizar el listado de colores!');
+      this.serverGetAll().subscribe(res => {
+        if (res.response) {
+          this.colores = res.result;
+          this.localSaveColores(this.colores).subscribe(res => {
+            response.response = true;
+            response.code = ResponseClass.RES_OK;
+            response.message = 'Colores Actualizadas correctamente!';
+            response.result = this.colores;
+            obs.next(response);
+          }, err => {
+            response.code = ResponseClass.RES_LOCAL_STORAGE_FAIL;
+            response.result = err;
+            obs.error(response);
+          });
+        } else {
+          response.result = res;
+          obs.error(response);
+        }
+      }, err => {
+        response.result = err;
+        obs.error(response);
+      })
+    });
+  }
+
+
 }
 

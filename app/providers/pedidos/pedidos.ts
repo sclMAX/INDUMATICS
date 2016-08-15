@@ -71,11 +71,11 @@ export class Pedidos {
 
   private initDB() { this.db = PouchDB('pedidos', { adapter: 'websql' }); }
 
-  private convertToServer(p: Pedido) {
+  private convertToServer(p: Pedido): PedidoServer {
     let ps = new PedidoServer();
     ps.id = 0;
     ps.idUsuario = p.idUsuario * 1;
-    ps.isPedido = p.isPedido;    
+    ps.isPedido = p.isPedido;
     ps.fecha = p.fecha;
     ps.isEnviado = p.isEnviado;
     ps.isProcesado = p.isProcesado;
@@ -92,7 +92,7 @@ export class Pedidos {
     });
     return ps;
   }
-  private localGetActual() {
+  private localGetActual(): Observable<Pedido> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('actual').then(doc => {
@@ -105,7 +105,7 @@ export class Pedidos {
   private localDeleteActual() {
     return this.localSaveActual(null);
   }
-  private localSaveActual(pedido: Pedido) {
+  private localSaveActual(pedido: Pedido): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('actual').then(doc => {
@@ -115,21 +115,27 @@ export class Pedidos {
           doc: pedido
         });
       }).then(() => {
-        obs.next(pedido);
+        let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos actualizados correctamente!');
+        response.result = pedido;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'actual',
           doc: pedido
         }).then(() => {
-          obs.next(pedido);
+          let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos ingresados correctamente!');
+          response.result = pedido;
+          obs.next(response);
         }).catch(err => {
-          obs.error(err);
+          let response = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al guardar localmente');
+          response.result = err;
+          obs.error(response);
         })
       })
     });
   }
 
-  private localGetEnviados() {
+  private localGetEnviados(): Observable<Array<Pedido>> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('enviados').then(doc => {
@@ -140,7 +146,7 @@ export class Pedidos {
     });
   }
 
-  public localSaveEnviados(pedidos: Array<Pedido>) {
+  public localSaveEnviados(pedidos: Array<Pedido>): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('enviados').then(doc => {
@@ -150,21 +156,27 @@ export class Pedidos {
           doc: pedidos
         });
       }).then(() => {
-        obs.next(pedidos);
+        let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos actualizados correctamente!');
+        response.result = pedidos;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'enviados',
           doc: pedidos
         }).then(() => {
-          obs.next(pedidos);
+          let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos ingresados correctamente!');
+          response.result = pedidos;
+          obs.next(response);
         }).catch(err => {
-          obs.error(err);
+          let response = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al guardar localmente');
+          response.result = err;
+          obs.error(response);
         })
       });
     });
   }
 
-  private serverSend(pedido: any) {
+  private serverSend(pedido: any): Observable<ResponseClass.Response> {
     let data = JSON.stringify(pedido);
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
@@ -172,9 +184,10 @@ export class Pedidos {
     return this.http.post(url, { 'apikey': 30708166614, 'pedido': pedido }, options).map(res => res.json());
   }
 
-  private setActualToEnviado(pedido: Pedido, enviados: Array<Pedido>) {
+  private setActualToEnviado(pedido: Pedido, enviados: Array<Pedido>): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       pedido.isEnviado = true;
+      let response: ResponseClass.Response;
       let pedidoEnviar: any = this.convertToServer(pedido);
       this.serverSend(pedidoEnviar).subscribe(res => { //Envia el pedido al servidor
         if (res.response) { //Exito
@@ -184,27 +197,28 @@ export class Pedidos {
             this.pedidoActual = null;
             this.localSaveEnviados(enviados).subscribe(() => { //Guarda el pedido en lista de pedidos enviados
               this.pedidosEnviado = enviados;
-              let r = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Se envio el pedido Correctamente!');
-              obs.next(r);
+              response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Se envio el pedido Correctamente!');
+              response.result = this.pedidosEnviado;
+              obs.next(response);
             }, err => { //si falla al guardar lista de pedidos Retorna Ok pero con warnings
-              let r = new ResponseClass.Response(true, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Se envio el pedido Correctamente, pero no se pudo guardar en lista de enviados local!');
-              obs.next(r);
+              response = new ResponseClass.Response(true, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Se envio el pedido Correctamente, pero no se pudo guardar en lista de enviados local!');
+              obs.next(response);
             })
           }, err => {//si falla al borrar el pedido actual Retorna Ok pero con warnings
-            let r = new ResponseClass.Response(true, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Se envio el pedido Correctamente, pero no se pudo eliminar la copia local!');
-            obs.next(r);
+            response = new ResponseClass.Response(true, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Se envio el pedido Correctamente, pero no se pudo eliminar la copia local!');
+            obs.next(response);
           });
         } else { //Si falla al enviar al servidor retorna el error del servidor
           obs.error(res);
         }
       }, err => {
-        let r = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'Sin conexión!');
-        obs.error(r);
+        response = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'Sin conexión!');
+        obs.error(response);
       })
     });
   }
 
-  public getActual() {
+  public getActual(): Observable<Pedido> {
     if (this.pedidoActual) {
       return Observable.create(obs => {
         obs.next(this.pedidoActual);
@@ -223,7 +237,7 @@ export class Pedidos {
     }
   }
 
-  public saveActual(pedido: Pedido) {
+  public saveActual(pedido: Pedido): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       this.pedidoActual = pedido;
       this.localSaveActual(this.pedidoActual).subscribe(res => {
@@ -235,7 +249,7 @@ export class Pedidos {
     });
   }
 
-  public addItem(item: Item) {
+  public addItem(item: Item): Observable<ResponseClass.Response> {
     if (this.pedidoActual) {
       return Observable.create(obs => {
         this.pedidoActual.detalle.push(item);
@@ -276,7 +290,7 @@ export class Pedidos {
 
   }
 
-  public getEnviados() {
+  public getEnviados(): Observable<Array<Pedido>> {
     if (this.pedidosEnviado) {
       return Observable.create(obs => {
         obs.next(this.pedidosEnviado);
@@ -295,10 +309,10 @@ export class Pedidos {
     }
   }
 
-  public sendPedido(pedido: Pedido) {
+  public sendPedido(pedido: Pedido): Observable<ResponseClass.Response> {
     if (!pedido.idUsuario) {
       return Observable.create(obs => {
-        let r = new ResponseClass.Response(false, ResponseClass.RES_FALTAN_PARAMETROS, 'Debe registrarse como usuario - Opciones -> Datos de Usuario!');
+        let r = new ResponseClass.Response(false, ResponseClass.RES_FALTAN_PARAMETROS, 'Debe registrarse como usuario para poder enviar los pedidos.Opciones -> Datos de Usuario!');
         obs.error(r);
       });
     } else {
@@ -328,7 +342,6 @@ export class Pedidos {
             });
           })
         }
-
       });
     }
   }

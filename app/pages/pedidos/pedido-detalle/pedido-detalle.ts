@@ -49,7 +49,6 @@ export class PedidoDetallePage {
   sendPedido() {
     let load = Loading.create({
       content: 'Enviando pedido...',
-      duration: 3000
     });
     let t = Toast.create({ duration: 3000 });
     this.navCtrl.present(load).then(() => {

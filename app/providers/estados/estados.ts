@@ -48,30 +48,44 @@ export class Estados {
     return this.http.get(url, options).map(res => res.json());
   }
 
-  private localSave(id: string, estado: Estado): Promise<any> {
-    if (!this.db) { this.initDB(); }
-    return this.db.get(id).then(doc => {
-      return this.db.put({
-        _id: id,
-        _rev: doc._rev,
-        doc: estado
-      });
-    }).catch(() => {
-      return this.db.put({
-        _id: id,
-        doc: estado
+  private localSave(id: string, estado: Estado): Observable<Estado> {
+    return Observable.create(obs => {
+      if (!this.db) { this.initDB(); }
+      this.db.get(id).then(doc => {
+        return this.db.put({
+          _id: id,
+          _rev: doc._rev,
+          doc: estado
+        });
+      }).then(() => {
+        obs.next(estado);
+      }).catch(() => {
+        this.db.put({
+          _id: id,
+          doc: estado
+        }).then(() => {
+          obs.next(estado);
+        }).catch(err => {
+          obs.error(err);
+        });
       });
     });
   }
 
-  private localGet(id: string): Promise<any> {
-    if (!this.db) { this.initDB(); }
-    return this.db.get(id);
+  private localGet(id: string): Observable<Estado> {
+    return Observable.create(obs => {
+      if (!this.db) { this.initDB(); }
+      this.db.get(id).then(doc => {
+        obs.next(doc.doc);
+      }).catch(err => {
+        obs.error(err);
+      });
+    });
   }
 
   public setCatalogoVersionNow(): Observable<boolean> {
     return Observable.create(obs => {
-      this.localGet(idL).then(estado => {
+      this.localGet(idL).subscribe(estado => {
         if (estado) {
           estado.catalogoVersion = new Date();
         } else {
@@ -82,7 +96,7 @@ export class Estados {
         }, err => {
           obs.error(err);
         });
-      }).catch(() => {
+      }, err => {
         this.updateLocalEstado(new Estado()).subscribe(res => {
           obs.next(res.response);
         }, err => {
@@ -94,13 +108,13 @@ export class Estados {
 
   public updateLocalEstado(estado: Estado): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
-      this.localSave(idL, estado).then(() => {
+      this.localSave(idL, estado).subscribe(() => {
         this.localEstado = estado;
         this.serverEstado = null;
-        this.localSave(idS, this.serverEstado).then();
+        this.localSave(idS, this.serverEstado).subscribe();
         obs.next(new ResponseClass.Response(true, ResponseClass.RES_OK, 'Se actualizao correctamente el estado local'));
         obs.complete();
-      }).catch(() => {
+      }, err => {
         obs.error(new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'No se pudo guardar el estado local'));
       });
     });
@@ -111,10 +125,10 @@ export class Estados {
       this.serverGetEstado().subscribe(res => {
         if (res.response) {
           this.serverEstado = res.result[0];
-          this.localSave(idS, this.serverEstado).then(() => {
+          this.localSave(idS, this.serverEstado).subscribe(() => {
             obs.next(this.serverEstado);
             obs.complete();
-          }).catch(() => {
+          }, err => {
             obs.error(new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'No se pudo guardar localmente'))
           })
         } else {
@@ -133,13 +147,12 @@ export class Estados {
    */
   public chkEstado(): Observable<EstadoResult> {
     return Observable.create(obs => {
-      this.localGet(idL).then(doc => {
-        this.localEstado = doc.doc;
-        console.log('LOCAL:', this.localEstado);
+      this.localGet(idL).subscribe(estado => {
+        this.localEstado = estado;
         let resEstado = new EstadoResult();
         resEstado.estado = this.localEstado;
-        this.localGet(idS).then(doc => {
-          this.serverEstado = doc.doc;
+        this.localGet(idS).subscribe(sEstado => {
+          this.serverEstado = sEstado;
           if (this.serverEstado) {
             resEstado.isUpdate = (this.serverEstado.catalogoVersion > this.localEstado.catalogoVersion);
             if ((resEstado.isUpdate) || (this.serverEstado.novedades != this.localEstado.novedades)) {
@@ -148,13 +161,13 @@ export class Estados {
           }
           obs.next(resEstado);
           obs.complete();
-        }).catch(() => {
+        }, err => {
           obs.next(resEstado);
           obs.complete();
         });
-      }).catch(() => {
-        this.localGet(idS).then(doc => {
-          this.serverEstado = doc.doc;
+      }, err => {
+        this.localGet(idS).subscribe(estado => {
+          this.serverEstado = estado;
           if (this.serverEstado) {
             let resEstado = new EstadoResult();
             resEstado.isUpdate = true;
@@ -164,7 +177,7 @@ export class Estados {
           } else {
             obs.error();
           }
-        }).catch(() => {
+        }, err => {
           obs.error();
         })
       });

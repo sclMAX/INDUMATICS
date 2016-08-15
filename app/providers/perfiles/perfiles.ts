@@ -38,7 +38,7 @@ export class Perfiles {
    * @returns {Observable}
    * Existo/Falla : {Response}
    */
-  private serverGetAll() {
+  private serverGetAll(): Observable<ResponseClass.Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     return this.http.get(apiUrl, options).map(res => res.json());
@@ -49,11 +49,10 @@ export class Perfiles {
    * 
    * @private
    * @param {Array<Perfil>} p
-   * @returns {Observable}
-   * Exito: {Array<Perfil>}
-   * Falla: {Response}
+   * @returns {Observable<ResponseClass.Response>}
+   * Exito: Response.result = Array<Perfil>;
    */
-  private localSavePerfiles(p: Array<Perfil>) {
+  private localSavePerfiles(p: Array<Perfil>): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('perfil').then(doc => {
@@ -64,14 +63,18 @@ export class Perfiles {
         });
       }).then(() => {
         this.setEstado();
-        obs.next(p);
+        let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos actualizados correctamente!');
+        response.result = p;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'perfil',
           doc: p
         }).then(() => {
           this.setEstado();
-          obs.next(p);
+          let response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos ingresados correctamente!');
+          response.result = p;
+          obs.next(response);
         }).catch(err => {
           let r = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'No se pudo gurdar el cache local');
           obs.error(r);
@@ -84,11 +87,11 @@ export class Perfiles {
    * Recupera los perfiles del cache local
    * 
    * @private
-   * @returns {Observable}
+   * @returns {Observable<Array<Perfil>>}
    * Exito: {Array<Perfil>}
    * Falla: Observable.error(error)
    */
-  private localGetAll() {
+  private localGetAll(): Observable<Array<Perfil>> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('perfil').then(doc => {
@@ -102,11 +105,11 @@ export class Perfiles {
   /**
    * Busca en el cache local o el servidor los pediles 
    * 
-   * @returns {Observable}
+   * @returns {Observable<Array<Perfil>>}
    * Exito: {Array<Perfil>}
    * Falla: {Response}
    */
-  private getAll() {
+  private getAll(): Observable<Array<Perfil>> {
     if (this.perfiles) {
       return Observable.create(obs => { obs.next(this.perfiles); });
     } else {
@@ -135,7 +138,7 @@ export class Perfiles {
     }
   }
 
-  public getPerfilesLinea(l: Linea) {
+  public getPerfilesLinea(l: Linea): Observable<Array<Perfil>> {
     if (this.perfiles) {
       return Observable.create(obs => {
         let pl: Array<Perfil> = this.perfiles.filter((perfil) => {
@@ -160,6 +163,34 @@ export class Perfiles {
     }
   }
 
+  public update(): Observable<ResponseClass.Response> {
+    return Observable.create(obs => {
+      let response: ResponseClass.Response;
+      response = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'No se pudos actualizar el listado de perfiles!');
+      this.serverGetAll().subscribe(res => {
+        if (res.response) {
+          this.perfiles = res.result;
+          this.localSavePerfiles(this.perfiles).subscribe(res => {
+            response.response = true;
+            response.code = ResponseClass.RES_OK;
+            response.message = 'Perfiles Actualizadas correctamente!';
+            response.result = this.perfiles;
+            obs.next(response);
+          }, err => {
+            response.code = ResponseClass.RES_LOCAL_STORAGE_FAIL;
+            response.result = err;
+            obs.error(response);
+          });
+        } else {
+          response.result = res;
+          obs.error(response);
+        }
+      }, err => {
+        response.result = err;
+        obs.error(response);
+      })
+    });
+  }
 
 
 

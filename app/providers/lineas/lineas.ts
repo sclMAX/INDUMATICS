@@ -28,13 +28,14 @@ export class Lineas {
    * 
    * @private
    * @param {Array<Linea>} l
-   * @returns {Observable}
-   * Exito: {Array<Linea>} l
-   * Falla: Observable.error(error)
+   * @returns {Observable<ResponseClass.Response>}
+   * Exito: Response.result = {Array<Linea>}
+   * Falla: Response.result = error
    */
-  private localSaveLineas(l: Array<Linea>) {
+  private localSaveLineas(l: Array<Linea>): Observable<ResponseClass.Response> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB() };
+      let response: ResponseClass.Response;
       this.db.get('linea').then(doc => {
         return this.db.put({
           _id: 'linea',
@@ -42,15 +43,21 @@ export class Lineas {
           _rev: doc._rev
         });
       }).then(res => {
-        obs.next(l);
+        response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos actualizados correctamente!');
+        response.result = l;
+        obs.next(response);
       }).catch(err => {
         this.db.put({
           _id: 'linea',
           doc: l
         }).then(() => {
-          obs.next(l);
+          response = new ResponseClass.Response(true, ResponseClass.RES_OK, 'Datos ingresados correctamente!');
+          response.result = l;
+          obs.next(response);
         }).catch(err => {
-          obs.error(err);
+          response = new ResponseClass.Response(false, ResponseClass.RES_LOCAL_STORAGE_FAIL, 'Error al guardar localmente!');
+          response.result = err;
+          obs.error(response);
         })
       });
     });
@@ -60,11 +67,11 @@ export class Lineas {
    * Recupera las lineas gurdadas localmente
    * 
    * @private
-   * @returns {Observable}
+   * @returns {Observable<Array<Linea>>}
    * Exito: {Array<Linea>}
    * Falla: Observable.error(error)
    */
-  private localGetLineas() {
+  private localGetLineas(): Observable<Array<Linea>> {
     return Observable.create(obs => {
       if (!this.db) { this.initDB(); }
       this.db.get('linea').then(doc => {
@@ -80,10 +87,10 @@ export class Lineas {
    * Descarga las lineas del Servidor
    * 
    * @private
-   * @returns {Observable}
+   * @returns {Observable<ResponseClass.Response> }
    * Exito/Falla: {Response}
    */
-  private serverGetLineas() {
+  private serverGetLineas(): Observable<ResponseClass.Response> {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({ headers: headers });
     let url: string = apiUrl;
@@ -130,6 +137,34 @@ export class Lineas {
     }
   }
 
+  public update(): Observable<ResponseClass.Response> {
+    let response: ResponseClass.Response;
+    response = new ResponseClass.Response(false, ResponseClass.RES_SERVER_ERROR, 'No se pudo Actualizar las Lineas Disponibles!');
+    return Observable.create(obs => {
+      this.serverGetLineas().subscribe(res => {
+        if (res.response) {
+          this.lineas = res.result;
+          this.localSaveLineas(this.lineas).subscribe(res => {
+            response.response = true;
+            response.code = ResponseClass.RES_OK;
+            response.message = 'Lineas Actualizadas correctamente!';
+            response.result = this.lineas;
+            obs.next(response);
+          }, err => {
+            response.code = ResponseClass.RES_LOCAL_STORAGE_FAIL;
+            response.result = err;
+            obs.error(response)
+          })
+        } else {
+          response.result = res;
+          obs.error(response);
+        }
+      }, err => {
+        response.result = err;
+        obs.error(response);
+      })
+    });
+  }
 
 
 

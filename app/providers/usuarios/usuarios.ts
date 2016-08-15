@@ -218,7 +218,7 @@ export class Usuarios {
         obs.complete();
       }, err => {
         obs.error(err);
-      }, () => { obs.complete() });
+      });
     });
   }
 
