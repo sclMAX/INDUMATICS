@@ -1,0 +1,5 @@
+keytool -genkey -v -keystore indumatics-release-key.keystore -alias indumaticsapp -keyalg RSA -keysize 2048 -validity 10000
+
+jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore indumatics-release-key.keystore android-release-unsigned.apk indumaticsapp
+
+zipalign -v 4 android-release-unsigned.apk Indumatics.apk

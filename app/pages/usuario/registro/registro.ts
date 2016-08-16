@@ -36,6 +36,7 @@ export class RegistroPage {
       this.navCtrl.present(load).then(() => {
         this.usuariosP.updateUsuario(this.usuario).subscribe(value => {
           load.dismiss().then(() => {
+            this.navCtrl.pop();
             t.setMessage('Usuario actualizado correctamente');
             this.navCtrl.present(t);
           });
@@ -78,7 +79,9 @@ export class RegistroPage {
                     text: 'Aceptar',
                     handler: data => {
                       this.usuariosP.recuperarCuenta(this.usuario, data.codigo, id).subscribe(() => {
-
+                        t.setMessage('Datos guardados correctamente!');
+                        this.navCtrl.setRoot(HomePage);
+                        this.navCtrl.present(t);
                       }, err => {
                         if (err.code == ResponseClass.RES_ACCESO_DENEGADO) {
                           t.setMessage('Codigo Incorrecto!');
@@ -87,9 +90,7 @@ export class RegistroPage {
                         }
                         this.navCtrl.present(t);
                       }, () => {
-                        t.setMessage('Datos guardados correctamente!');
                         this.navCtrl.setRoot(HomePage);
-                        this.navCtrl.present(t);
                       });
                     }
                   }
