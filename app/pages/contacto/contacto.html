@@ -1,6 +1,7 @@
 <ion-header>
   <ion-navbar primary>
-    <ion-title><ion-icon name="contacts"></ion-icon> {{title}}</ion-title>
+    <ion-title>
+      <ion-icon name="contacts"></ion-icon> {{title}}</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content padding>
@@ -23,17 +24,21 @@
     <ion-list-header secondary>
       E-Mails
     </ion-list-header>
-    <ion-item tappable  (click)="goMail('perfiles@indumatics.com.ar')">
+    <ion-item tappable (click)="goMail('perfiles@indumatics.com.ar')">
       <ion-icon name="mail"></ion-icon>
       perfiles@indumatics.com.ar
     </ion-item>
-    <ion-item tappable  (click)="goMail('administrasion@indumatics.com.ar')">
+    <ion-item tappable (click)="goMail('administrasion@indumatics.com.ar')">
       <ion-icon name="mail"></ion-icon>
       administrasion@indumatics.com.ar
     </ion-item>
-    <ion-item tappable  (click)="goMail('dptocomercial@indumatics.com.ar')">
+    <ion-item tappable (click)="goMail('dptocomercial@indumatics.com.ar')">
       <ion-icon name="mail"></ion-icon>
       dptocomercial@indumatics.com.ar
+    </ion-item>
+    <ion-item tappable (click)="goMail('soporte@indumatics.com.ar')">
+      <ion-icon name="mail"></ion-icon>
+      soporte@indumatics.com.ar
     </ion-item>
   </ion-list>
 </ion-content>

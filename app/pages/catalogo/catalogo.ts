@@ -28,18 +28,17 @@ export class CatalogoPage {
           content: 'Cargando lineas disponibles...',
         });
         this.navCtrl.present(load).then(() => {
-          this.lineasP.getAll()
-            .subscribe(value => {
-              this.lineas = value;
-            }, err => {
-              load.dismiss().then(() => {
-                let t = Toast.create({ duration: 2000 });
-                t.setMessage(err.message);
-                this.navCtrl.present(t);
-              });
-            }, () => {
-              load.dismiss();
+          this.lineasP.getAll().subscribe(value => {
+            this.lineas = value;
+          }, err => {
+            load.dismiss().then(() => {
+              let t = Toast.create({ duration: 2000 });
+              t.setMessage(err.message);
+              this.navCtrl.present(t);
             });
+          }, () => {
+            load.dismiss();
+          });
         });
       }
     });

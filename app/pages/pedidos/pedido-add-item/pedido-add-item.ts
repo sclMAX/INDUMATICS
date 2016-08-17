@@ -33,21 +33,14 @@ export class PedidoAddItemPage {
   }
 
   add() {
-    let load = Loading.create({ content: 'Agregando al pedido...' });
-    this.nav.present(load).then(() => {
-      this.pedidosP.addItem(this.pedidoItem).subscribe(res => {
-        let t = Toast.create({ duration: 2000, message: 'Item agregado correctamente!' });
-        this.nav.pop().then(() => {
-          this.nav.present(t);
-        });
-      }, err => {
-        load.dismiss().then(() => {
-          let t = Toast.create({ duration: 2000, message: 'No se pudo agregar el item!' });
-          this.nav.present(t);
-        });
-      }, () => {
-        load.dismiss();
-      })
+    let t = Toast.create({ duration: 2000 });
+    this.pedidosP.addItem(this.pedidoItem).subscribe(res => {
+      t.setMessage('Item agregado correctamente!');
+      this.nav.pop();
+      this.nav.present(t);
+    }, err => {
+      t.setMessage('No se pudo agregar el item!');
+      this.nav.present(t);
     });
   }
 
