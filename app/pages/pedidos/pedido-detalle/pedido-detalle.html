@@ -52,11 +52,12 @@
 
 </ion-content>
 <ion-footer>
-  <button fab fab-bottom fab-rigth [disabled]="isModify" *ngIf="isEdit" (click)="goConfig()">
+  <ion-list-footer>
+    <button fab fab-bottom fab-rigth [disabled]="isModify" *ngIf="isEdit" (click)="goConfig()">
     <ion-icon name="options"></ion-icon>
   </button>
-  <button fab fab-bottom fab-center [disabled]="(!pedido || isModify || !(items.length > 0))" *ngIf="isEdit"
-    (click)="sendPedido()">
+    <button fab fab-bottom fab-center [disabled]="(!pedido || isModify || !(items.length > 0))" *ngIf="isEdit" (click)="sendPedido()">
     <ion-icon name="send" ></ion-icon>
   </button>
+  </ion-list-footer>
 </ion-footer>
