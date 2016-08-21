@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController, Platform, Loading, Toast, Alert} from 'ionic-angular';
+import {NavController, Platform, LoadingController, ToastController, Loading, Alert} from 'ionic-angular';
 import {Usuarios, Usuario} from '../../providers/usuarios/usuarios';
 import {Estados, Estado} from '../../providers/estados/estados';
 import {Lineas} from '../../providers/lineas/lineas';
@@ -24,7 +24,8 @@ export class HomePage {
 
   constructor(public navCtrl: NavController, private platform: Platform,
     private usuariosP: Usuarios, private estadosP: Estados, private lineasP: Lineas,
-    private perfilesP: Perfiles, private coloresP: Colores) {
+    private perfilesP: Perfiles, private coloresP: Colores, private toast: ToastController,
+    private loading: LoadingController) {
     this.title = "INDUMATICS S.A.";
     this.novedades = '';
   }
@@ -47,30 +48,23 @@ export class HomePage {
 
   goUpdate() {
     let load: Loading;
-    let t = Toast.create({ duration: 2000 });
+    let t = this.toast.create({ duration: 2000 });
     Observable.create(obs => {
-      load = Loading.create({ content: 'Actualizando Lineas...' });
-      this.navCtrl.present(load).then(() => {
+      load = this.loading.create({ content: 'Actualizando Lineas...' });
+      load.present().then(() => {
+        load.setContent('Hola MUNDO');
         this.lineasP.update().subscribe(res => {
-          load.dismiss().then(() => {
-            load = Loading.create({ content: 'Actualizando Perfiles...' });
-            this.navCtrl.present(load).then(() => {
-              this.perfilesP.update().subscribe(res => {
-                load.dismiss().then(() => {
-                  load = Loading.create({ content: 'Actualizando Colores...' });
-                  this.navCtrl.present(load).then(() => {
-                    this.coloresP.update().subscribe(res => {
-                      obs.next(res);
-                      obs.complete();
-                    }, err => {
-                      obs.error(err);
-                    });
-                  });
-                });
-              }, err => {
-                obs.error(err);
-              });
+          load.setContent('Actualizando Perfiles...');
+          this.perfilesP.update().subscribe(res => {
+            load.setContent('Actualizando Colores...');
+            this.coloresP.update().subscribe(res => {
+              obs.next(res);
+              obs.complete();
+            }, err => {
+              obs.error(err);
             });
+          }, err => {
+            obs.error(err);
           });
         }, err => {
           obs.error(err);
@@ -84,12 +78,12 @@ export class HomePage {
       });
       t.setMessage('Actualizacion exitosa!');
       load.dismiss().then(() => {
-        this.navCtrl.present(t);
+        t.present();
       });
     }, err => {
       t.setMessage('No se pudo actualiuzar');
       load.dismiss().then(() => {
-        this.navCtrl.present(t);
+        t.present();
       });
     }, () => {
       load.dismiss();
@@ -106,16 +100,16 @@ export class HomePage {
         if (!res.estado.isLeido) {
           this.novedades = res.estado.novedades;
           if (this.novedades) {
-            let showNovedades = Toast.create({
+            let showNovedades = this.toast.create({
               message: 'Novedades: ' + this.novedades,
               showCloseButton: true,
               closeButtonText: 'Ok',
             });
-            showNovedades.onDismiss(btn => {
+            showNovedades.onDidDismiss(btn => {
               res.estado.isLeido = true;
               this.estadosP.updateLocalEstado(res.estado).subscribe();
             });
-            this.navCtrl.present(showNovedades);
+            showNovedades.present();
           }
         }
       });

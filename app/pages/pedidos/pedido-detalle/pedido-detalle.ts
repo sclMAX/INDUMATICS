@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, Loading, Alert, Toast} from 'ionic-angular';
+import { NavController, NavParams, Platform, LoadingController, AlertController, ToastController} from 'ionic-angular';
 import {Pedidos, Pedido, Item} from '../../../providers/pedidos/pedidos';
 import {CatalogoPage} from '../../catalogo/catalogo';
 import {PerfilesDetallePage} from '../../catalogo/perfiles-detalle/perfiles-detalle';
@@ -19,13 +19,14 @@ export class PedidoDetallePage {
   isModify: boolean;
 
   constructor(private navCtrl: NavController, private parametros: NavParams,
-    private pedidosP: Pedidos, private platform: Platform) {
+    private pedidosP: Pedidos, private platform: Platform, private alert: AlertController,
+    private toast: ToastController, private loading: LoadingController) {
     this.pedido = this.parametros.get('pedido');
     this.items = this.pedido.detalle;
     this.isEdit = this.parametros.get('edit');
     if (!this.isEdit) {
       this.title = ((this.pedido.isPedido) ? 'PEDIDO ' : 'PRESUPUESTO ') + 'Nro:000' + this.pedido.id;
-    }else{
+    } else {
       this.title = "Pendiente de Envio";
     }
   }
@@ -47,21 +48,21 @@ export class PedidoDetallePage {
   }
 
   sendPedido() {
-    let load = Loading.create({
+    let load = this.loading.create({
       content: 'Enviando pedido...',
     });
-    let t = Toast.create({ duration: 3000 });
-    this.navCtrl.present(load).then(() => {
+    let t = this.toast.create({ duration: 3000 });
+    load.present().then(() => {
       this.pedidosP.sendPedido(this.pedido).subscribe(res => {
         this.navCtrl.setRoot(HomePage);
         load.dismiss().then(() => {
           t.setMessage(res.message);
-          this.navCtrl.present(t);
+          t.present();
         });
       }, err => {
         load.dismiss().then(() => {
           t.setMessage(err.message);
-          this.navCtrl.present(t);
+          t.present();
         });
       }, () => {
         load.dismiss();
@@ -86,7 +87,7 @@ export class PedidoDetallePage {
   }
 
   removeItem(item) {
-    let confirm = Alert.create({
+    let confirm = this.alert.create({
       title: 'Quitar Item?',
       message: 'Esta seguro que desea quitar el item del pedido',
       buttons: [{ text: 'Cancelar' },
@@ -98,29 +99,29 @@ export class PedidoDetallePage {
           }
         }]
     });
-    this.navCtrl.present(confirm);
+    confirm.present();
   }
 
   incCantidad(item) {
-    let t = Toast.create({
+    let t = this.toast.create({
       duration: 500,
       position: 'middle'
     });
     let c = ++this.items.find(value => value === item).cantidad;
     t.setMessage('Cantidad: ' + c);
-    this.navCtrl.present(t);
+    t.present();
     this.isModify = true;
   }
 
   decCantidad(item) {
-    let t = Toast.create({
+    let t = this.toast.create({
       duration: 500,
       position: 'middle'
     });
     let c: number = 1;
     (this.items.find(value => value === item).cantidad > 1) ? c = --this.items.find(value => value === item).cantidad : 1;
     t.setMessage('Cantidad: ' + c);
-    this.navCtrl.present(t);
+    t.present();
     this.isModify = true;
   }
 

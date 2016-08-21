@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Platform, Alert, Toast } from 'ionic-angular';
+import { NavController, Platform, AlertController, ToastController } from 'ionic-angular';
 import {Pedidos, Pedido} from '../../providers/pedidos/pedidos';
 import {PedidoDetallePage} from './pedido-detalle/pedido-detalle';
 import {Usuarios, Usuario} from '../../providers/usuarios/usuarios';
@@ -14,7 +14,8 @@ export class PedidosPage {
   pedidosEnviados: Array<Pedido> = [];
 
   constructor(private navCtrl: NavController, private pedidosP: Pedidos,
-    private platform: Platform, private usuariosP: Usuarios) {
+    private platform: Platform, private usuariosP: Usuarios, private alert: AlertController,
+    private toast: ToastController) {
     this.title = 'Pedidos';
   }
 
@@ -28,7 +29,7 @@ export class PedidosPage {
   }
 
   removeItem(pedido: Pedido) {
-    let confirm = Alert.create({
+    let confirm = this.alert.create({
       title: 'Quitar de historial...',
       message: 'Esta seguro que desea quitar el pedido Nro:000' + pedido.id + '?. Solo elimina el pedido del historial local (no lo anula en el servidor).',
       buttons: [{ text: 'Cancelar' },
@@ -37,13 +38,13 @@ export class PedidosPage {
           handler: () => {
             this.pedidosEnviados.splice((this.pedidosEnviados.findIndex(value => value === pedido)), 1);
             this.pedidosP.localSaveEnviados(this.pedidosEnviados).subscribe(() => {
-              let t = Toast.create({ duration: 2000, message: 'Pedido eliminado!' });
-              this.navCtrl.present(t);
+              let t = this.toast.create({ duration: 2000, message: 'Pedido eliminado!' });
+              t.present();
             });
           }
         }]
     });
-    this.navCtrl.present(confirm);
+    confirm.present();
   }
 
   ionViewWillEnter() {

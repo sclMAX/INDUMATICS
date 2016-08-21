@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, Loading, Toast } from 'ionic-angular';
+import { NavController, NavParams, Platform, LoadingController, ToastController } from 'ionic-angular';
 import {FormBuilder, ControlGroup, Validators} from '@angular/common';
 import {Pedidos, Item, Pedido} from '../../../providers/pedidos/pedidos';
 import {Colores, Color} from '../../../providers/colores/colores';
@@ -19,7 +19,7 @@ export class PedidoAddItemPage {
 
   constructor(private nav: NavController, private formBuilder: FormBuilder,
     private parametros: NavParams, private coloresP: Colores, private pedidosP: Pedidos,
-    private platform: Platform) {
+    private platform: Platform, private toast: ToastController, private loading: LoadingController) {
     this.pedidoItem = new Item();
     this.addForm = this.createForm();
     this.pedidoItem.perfil = this.parametros.get('perfil');
@@ -33,14 +33,14 @@ export class PedidoAddItemPage {
   }
 
   add() {
-    let t = Toast.create({ duration: 2000 });
+    let t = this.toast.create({ duration: 2000 });
     this.pedidosP.addItem(this.pedidoItem).subscribe(res => {
       t.setMessage('Item agregado correctamente!');
       this.nav.pop();
-      this.nav.present(t);
+      t.present();
     }, err => {
       t.setMessage('No se pudo agregar el item!');
-      this.nav.present(t);
+      t.present();
     });
   }
 
@@ -56,14 +56,14 @@ export class PedidoAddItemPage {
 
   ionViewWillEnter() {
     this.platform.ready().then(() => {
-      let load = Loading.create({ content: 'Cargando colores disponibles...' });
-      this.nav.present(load).then(() => {
+      let load = this.loading.create({ content: 'Cargando colores disponibles...' });
+      load.present().then(() => {
         this.coloresP.getAll().subscribe(res => {
           this.colores = res;
         }, err => {
           load.dismiss().then(() => {
-            let t = Toast.create({ duration: 2000, message: 'No se pudo cargar los colores!' });
-            this.nav.present(t).then(() => {
+            let t = this.toast.create({ duration: 2000, message: 'No se pudo cargar los colores!' });
+            t.present().then(() => {
               this.nav.pop();
             })
           });

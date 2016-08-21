@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Platform, Loading, Toast} from 'ionic-angular';
+import { NavController, NavParams, Platform, LoadingController, ToastController} from 'ionic-angular';
 import {Linea} from '../../../providers/lineas/lineas';
 import {HomePage} from '../../home/home';
 import {Perfiles, Perfil} from '../../../providers/perfiles/perfiles';
@@ -18,7 +18,8 @@ export class PerfilesPage {
   perfiles: Array<Perfil>;
   private perfilesTmp: Array<Perfil>;
   constructor(private navCtrl: NavController, private parametros: NavParams,
-    private platform: Platform, private perfilesP: Perfiles) {
+    private platform: Platform, private perfilesP: Perfiles, private loading: LoadingController,
+    private toast: ToastController) {
     this.linea = this.parametros.get('linea');
     this.title = "Perfiles: " + this.linea.linea;
   }
@@ -52,16 +53,16 @@ export class PerfilesPage {
   ionViewWillEnter() {
     this.platform.ready().then(() => {
       if (!this.perfiles) {
-        let load = Loading.create({
+        let load = this.loading.create({
           content: 'Cargando perfiles de la linea: ' + this.linea.linea
         });
-        this.navCtrl.present(load).then(() => {
+        load.present().then(() => {
           this.perfilesP.getPerfilesLinea(this.linea).subscribe(value => {
             this.perfiles = this.perfilesTmp = value;
           }, err => {
             load.dismiss().then(() => {
-              let t = Toast.create({ duration: 2000, message: err.message });
-              this.navCtrl.present(t);
+              let t = this.toast.create({ duration: 2000, message: err.message });
+              t.present();
             });
           }, () => {
             load.dismiss();

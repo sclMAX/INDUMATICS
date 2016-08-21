@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController, Loading, Toast, Alert} from 'ionic-angular';
+import {NavController, LoadingController, ToastController, AlertController} from 'ionic-angular';
 import {Platform} from 'ionic-angular';
 import {FormBuilder, ControlGroup, Validators} from '@angular/common';
 import {Observable} from 'rxjs/Observable';
@@ -19,7 +19,8 @@ export class RegistroPage {
 
 
   constructor(public navCtrl: NavController, private formBuilder: FormBuilder,
-    private usuariosP: Usuarios, private platform: Platform) {
+    private usuariosP: Usuarios, private platform: Platform, private loading: LoadingController,
+    private toast: ToastController, private alert: AlertController) {
     this.title = "Registro de Usuario";
     this.usuario = new Usuario();
     this.usuarioForm = this.createForm();
@@ -27,45 +28,45 @@ export class RegistroPage {
 
 
   registrarUsuario() {
-    let t = Toast.create({ duration: 2000 });
+    let t = this.toast.create({ duration: 2000 });
     this.isChange = false;
     if (this.usuario.id > 0) { //si tiene un id actualiza los cambios en el servidor 
-      let load = Loading.create({
+      let load = this.loading.create({
         content: 'Guardando datos del usuario...'
       });
-      this.navCtrl.present(load).then(() => {
+      load.present().then(() => {
         this.usuariosP.updateUsuario(this.usuario).subscribe(value => {
           load.dismiss().then(() => {
             this.navCtrl.pop();
             t.setMessage('Usuario actualizado correctamente');
-            this.navCtrl.present(t);
+            t.present();
           });
         }, err => {
           load.dismiss().then(() => {
             t.setMessage('Error al actualizar los datos ERROR:' + err);
-            this.navCtrl.present(t);
+            t.present();
           });
         }, () => {
           load.dismiss();
         });
       });
     } else { //si no, registra el usuario en el servidor
-      let load = Loading.create({
+      let load = this.loading.create({
         content: 'Registrar usuario...'
       });
-      this.navCtrl.present(load).then(() => {
+      load.present().then(() => {
         this.usuariosP.registrarUsuario(this.usuario).subscribe(value => {
           this.usuario = value.result;
           load.dismiss().then(() => {
             t.setMessage('Usuario registrado correctamente con el ID:' + this.usuario.id);
             this.navCtrl.setRoot(HomePage);
-            this.navCtrl.present(t);
+            t.present();
           });
         }, err => {
           load.dismiss().then(() => {
             if (err.code == ResponseClass.RES_DB_KEY_ERROR) { //Email ya registrado
               let id: number = <number>err.result;
-              let alert = Alert.create({
+              let alert = this.alert.create({
                 title: 'Recuperar cuenta...',
                 subTitle: 'Email ya registrado. Ingrese el codigo que se envio a esa direccion de Email para recuperar la cuenta.',
                 inputs: [{ name: 'codigo', type: 'number', placeholder: 'Ingrese el codigo' }],
@@ -81,14 +82,14 @@ export class RegistroPage {
                       this.usuariosP.recuperarCuenta(this.usuario, data.codigo, id).subscribe(() => {
                         t.setMessage('Datos guardados correctamente!');
                         this.navCtrl.setRoot(HomePage);
-                        this.navCtrl.present(t);
+                        t.present();
                       }, err => {
                         if (err.code == ResponseClass.RES_ACCESO_DENEGADO) {
                           t.setMessage('Codigo Incorrecto!');
                         } else {
                           t.setMessage('Error: ' + err.message);
                         }
-                        this.navCtrl.present(t);
+                        t.present();
                       }, () => {
                         this.navCtrl.setRoot(HomePage);
                       });
@@ -96,10 +97,10 @@ export class RegistroPage {
                   }
                 ]
               });
-              this.navCtrl.present(alert);
+              alert.present();
             } else {
               t.setMessage('Error al intentar registrar el ususario ERROR: ' + err.message);
-              this.navCtrl.present(t);
+              t.present();
             }
           });
         }, () => {
@@ -124,12 +125,12 @@ export class RegistroPage {
 
   ionViewWillEnter() {
     this.platform.ready().then(() => {
-      let load = Loading.create({
+      let load = this.loading.create({
         content: 'Cargando datos...',
         showBackdrop: false,
         dismissOnPageChange: true,
       });
-      this.navCtrl.present(load).then(() => {
+      load.present().then(() => {
         this.usuariosP.getUsuario()
           .subscribe(value => {
             this.usuario = value;

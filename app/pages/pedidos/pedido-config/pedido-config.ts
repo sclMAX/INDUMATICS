@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, Toast} from 'ionic-angular';
+import { NavController, NavParams, ToastController} from 'ionic-angular';
 import {Pedidos, Pedido} from '../../../providers/pedidos/pedidos';
 import {RegistroPage} from '../../usuario/registro/registro';
 import {FormBuilder, ControlGroup, Validators} from '@angular/common';
@@ -15,7 +15,7 @@ export class PedidoConfigPage {
   isChange: boolean = false;
 
   constructor(private navCtrl: NavController, private parametros: NavParams,
-    private pedidosP: Pedidos, private formBuilder: FormBuilder) {
+    private pedidosP: Pedidos, private formBuilder: FormBuilder, private toast: ToastController) {
     this.pedido = this.parametros.get('pedido');
     this.title = 'Ajustes pedido Actual';
     this.pedidoForm = this.createForm();
@@ -26,13 +26,13 @@ export class PedidoConfigPage {
   }
 
   savePedido() {
-    let t = Toast.create({ duration: 2000 });
+    let t = this.toast.create({ duration: 2000 });
     this.pedidosP.saveActual(this.pedido).subscribe(res => {
       t.setMessage('Ajustes guardados correctamente!');
-      this.navCtrl.present(t);
+      t.present();
     }, err => {
       t.setMessage('No se puedo guardar los cambios!');
-      this.navCtrl.present(t);
+      t.present();
     });
     this.isChange = false;
   }
