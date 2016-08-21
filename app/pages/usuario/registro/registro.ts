@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController, LoadingController, ToastController, AlertController} from 'ionic-angular';
 import {Platform} from 'ionic-angular';
-import {FormBuilder, ControlGroup, Validators} from '@angular/common';
+import {FormGroup} from '@angular/forms';
 import {Observable} from 'rxjs/Observable';
 import {Usuarios, Usuario} from '../../../providers/usuarios/usuarios';
 import {HomePage} from '../../home/home';
@@ -12,18 +12,17 @@ import * as ResponseClass from '../../../providers/clases/response';
   providers: [Usuarios]
 })
 export class RegistroPage {
-  usuarioForm: ControlGroup;
+  usuarioForm: FormGroup;
   title: string;
   usuario: Usuario;
   isChange: boolean = false;
 
 
-  constructor(public navCtrl: NavController, private formBuilder: FormBuilder,
+  constructor(public navCtrl: NavController,
     private usuariosP: Usuarios, private platform: Platform, private loading: LoadingController,
     private toast: ToastController, private alert: AlertController) {
     this.title = "Registro de Usuario";
     this.usuario = new Usuario();
-    this.usuarioForm = this.createForm();
   }
 
 
@@ -108,19 +107,6 @@ export class RegistroPage {
         })
       });
     }
-  }
-
-  private createForm() {
-    return this.formBuilder.group({
-      razonSocial: [''],
-      nombre: ['', Validators.required],
-      telefono: ['', Validators.required && Validators.minLength(8)],
-      email: ['', Validators.required && Validators.minLength(10)],
-      direccion: ['', Validators.required && Validators.minLength(6)],
-      localidad: ['', Validators.required && Validators.minLength(4)],
-      provincia: ['', Validators.required && Validators.minLength(5)],
-      pais: ['', Validators.required && Validators.minLength(5)],
-    });
   }
 
   ionViewWillEnter() {

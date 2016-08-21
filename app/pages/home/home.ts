@@ -50,13 +50,10 @@ export class HomePage {
     let load: Loading;
     let t = this.toast.create({ duration: 2000 });
     Observable.create(obs => {
-      load = this.loading.create({ content: 'Actualizando Lineas...' });
+      load = this.loading.create({ content: 'Actualizando Catalogo...' });
       load.present().then(() => {
-        load.setContent('Hola MUNDO');
         this.lineasP.update().subscribe(res => {
-          load.setContent('Actualizando Perfiles...');
           this.perfilesP.update().subscribe(res => {
-            load.setContent('Actualizando Colores...');
             this.coloresP.update().subscribe(res => {
               obs.next(res);
               obs.complete();

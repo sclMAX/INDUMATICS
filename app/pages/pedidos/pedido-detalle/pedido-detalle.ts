@@ -40,7 +40,8 @@ export class PedidoDetallePage {
   }
 
   goConfig() {
-    this.navCtrl.push(PedidoConfigPage, { 'pedido': this.pedido });
+    console.log('goConfig()',this.pedido)
+    this.navCtrl.push(PedidoConfigPage);
   }
 
   selectIsPedido(isPedido: boolean) {

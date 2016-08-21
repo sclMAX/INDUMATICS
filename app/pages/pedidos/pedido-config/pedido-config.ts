@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NavController, NavParams, ToastController} from 'ionic-angular';
 import {Pedidos, Pedido} from '../../../providers/pedidos/pedidos';
 import {RegistroPage} from '../../usuario/registro/registro';
-import {FormBuilder, ControlGroup, Validators} from '@angular/common';
+import {FormGroup} from '@angular/forms';
 
 @Component({
   templateUrl: 'build/pages/pedidos/pedido-config/pedido-config.html',
@@ -11,14 +11,13 @@ import {FormBuilder, ControlGroup, Validators} from '@angular/common';
 export class PedidoConfigPage {
   title: string;
   pedido: Pedido;
-  pedidoForm: ControlGroup;
+  pedidoForm: FormGroup;
   isChange: boolean = false;
 
   constructor(private navCtrl: NavController, private parametros: NavParams,
-    private pedidosP: Pedidos, private formBuilder: FormBuilder, private toast: ToastController) {
+    private pedidosP: Pedidos, private toast: ToastController) {
     this.pedido = this.parametros.get('pedido');
     this.title = 'Ajustes pedido Actual';
-    this.pedidoForm = this.createForm();
   }
 
   goRegistro() {
@@ -35,12 +34,6 @@ export class PedidoConfigPage {
       t.present();
     });
     this.isChange = false;
-  }
-
-  private createForm() {
-    return this.formBuilder.group({
-      tipo: ['', Validators.required],
-    });
   }
 
   onChanges() {

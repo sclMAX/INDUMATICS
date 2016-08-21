@@ -7,11 +7,11 @@
   <ion-list>
     <ion-item-group>
       <ion-item-divider light>AJUSTES PEDIDO ACTUAL</ion-item-divider>
-      <form [ngFormModel]="pedidoForm" (ngSubmit)="savePedido()">
+      <form #pedidoForm="ngForm"" (ngSubmit)="savePedido()">
         <ion-list>
           <ion-item>
             <ion-label primary stacked>Tipo</ion-label>
-            <ion-select ngControl="tipo" [(ngModel)]="pedido.isPedido" placeholder="Seleccione Pedido/Presupuesto..." (ionChange)="onChanges()"
+            <ion-select name="isPedido" [(ngModel)]="pedido.isPedido" placeholder="Seleccione Pedido/Presupuesto..." (ionChange)="onChanges()"
               required>
               <ion-option value="true">Pedido</ion-option>
               <ion-option value="false">Presupuesto</ion-option>
@@ -19,7 +19,7 @@
           </ion-item>
           <ion-item>
             <ion-label primary stacked>Comentarios</ion-label>
-            <ion-textarea rows="6" placeholder="Comentarios..." [(ngModel)]="pedido.comentarios" (change)="onChanges()"></ion-textarea>
+            <ion-textarea rows="6" placeholder="Comentarios..." name="comentarios" [(ngModel)]="pedido.comentarios" (change)="onChanges()"></ion-textarea>
           </ion-item>
         </ion-list>
         <button large full type="submit" [disabled]="!pedidoForm.valid || !isChange"><ion-icon name="checkmark"></ion-icon> Guardar</button>

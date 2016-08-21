@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
 import { NavController, NavParams, Platform, LoadingController, ToastController } from 'ionic-angular';
-import {FormBuilder, ControlGroup, Validators} from '@angular/common';
+import {FormGroup} from '@angular/forms';
 import {Pedidos, Item, Pedido} from '../../../providers/pedidos/pedidos';
 import {Colores, Color} from '../../../providers/colores/colores';
 
@@ -9,7 +9,7 @@ import {Colores, Color} from '../../../providers/colores/colores';
   providers: [Colores, Pedidos]
 })
 export class PedidoAddItemPage {
-  addForm: ControlGroup;
+  addForm: FormGroup;
   title: string;
   pedidoItem: Item;
   pesoTotal: number;
@@ -17,19 +17,12 @@ export class PedidoAddItemPage {
 
 
 
-  constructor(private nav: NavController, private formBuilder: FormBuilder,
+  constructor(private nav: NavController,
     private parametros: NavParams, private coloresP: Colores, private pedidosP: Pedidos,
     private platform: Platform, private toast: ToastController, private loading: LoadingController) {
     this.pedidoItem = new Item();
-    this.addForm = this.createForm();
     this.pedidoItem.perfil = this.parametros.get('perfil');
     this.title = 'Código: ' + this.pedidoItem.perfil.idPerfil;
-  }
-  private createForm() {
-    return this.formBuilder.group({
-      cantidad: ['', Validators.required && Validators.nullValidator && Validators.pattern('^[1-9][0-9]*$')],
-      color: ['', Validators.required && Validators.nullValidator]
-    });
   }
 
   add() {
